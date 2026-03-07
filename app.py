@@ -37,7 +37,10 @@ def predict():
         message = "dangerous"
 
     latest_data = {
-        "status": status
+        "status": status,
+        "message": message,
+        "current": current_value,
+        "score": round(float(score), 4)
     }
 
     return jsonify(latest_data)
