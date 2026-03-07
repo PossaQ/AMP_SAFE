@@ -4,41 +4,47 @@ import pickle
 import numpy as np
 
 app = Flask(__name__)
-CORS(app)  # ให้เว็บเพื่อนเรียกได้
+CORS(app)
 
-# โหลด model ตอนเปิด server
 with open('model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 print("✅ โหลด model สำเร็จ!")
 
-# ทดสอบว่า server ทำงานอยู่
+latest_data = {"status": "safe", "message": "รอข้อมูลจาก ESP32...", "current": 0, "score": 0}
+
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({"message": "AmpSafe API Running ✅"})
 
-# รับค่ากระแสแล้วทำนาย
 @app.route('/predict', methods=['POST'])
 def predict():
+    global latest_data
     data = request.json
-    current_value = data['current']  # รับค่ากระแสจากเว็บ
+    current_value = data['current']
 
     result = model.predict([[current_value]])
     score = model.decision_function([[current_value]])[0]
 
     if result[0] == 1:
-        status = "normal"
-        message = "✅ ปกติ"
+        status = "safe"
+        message = "safe"
+    elif score >= -0.1:
+        status = "warning"
+        message = "warning"
     else:
-        status = "anomaly"
-        message = "⚠️ ผิดปกติ! ควรตรวจสอบเครื่องจักร"
+        status = "dangerous"
+        message = "dangerous"
 
-    return jsonify({
-        "status": status,
-        "message": message,
-        "current": current_value,
-        "score": round(float(score), 4)
-    })
+    latest_data = {
+        "status": status
+    }
+
+    return jsonify(latest_data)
+
+@app.route('/latest', methods=['GET'])
+def latest():
+    return jsonify(latest_data)
 
 if __name__ == '__main__':
     import os
