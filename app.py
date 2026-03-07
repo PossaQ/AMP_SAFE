@@ -22,6 +22,7 @@ def predict():
     global latest_data
     data = request.json
     current_value = data['current']
+    device_name = data.get('name', 'Machine 1')
 
     result = model.predict([[current_value]])
     score = model.decision_function([[current_value]])[0]
@@ -37,6 +38,7 @@ def predict():
         message = "dangerous"
 
     latest_data = {
+        "name": device_name,
         "status": status,
         "message": message,
         "current": current_value,
