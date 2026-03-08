@@ -3,13 +3,19 @@ from flask_cors import CORS
 import pickle
 import numpy as np
 
+VALID_TOKENS = {
+    "TOKEN001": "Machine 1",
+    "TOKEN002": "Machine 2",
+    "TOKEN003": "Machine 3",
+}
+
 app = Flask(__name__)
 CORS(app)
 
 with open('model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-print("✅ โหลด model สำเร็จ!")
+print("model loaded")
 
 latest_data = {"status": "safe", "message": "รอข้อมูลจาก ESP32...", "current": 0, "score": 0}
 
